@@ -95,7 +95,7 @@ int main()
 }
 
 int generate_card() {
-    int cardvalue = rand() % 10 + 1;
+    int cardvalue = rand() % 13 + 1;
     return cardvalue;
 }
 
@@ -105,6 +105,13 @@ void player_draw_card() {
     if (card == 1) {
         int choice_ace = 0;
         do {
+            std::cout << R"(
+        .------.
+        |A.--. |
+        | :/\: |
+        | (__) |
+        | '--'A|
+        `------')";
             std::cout << "\n You drew an Ace. Would you like it to have a value of 1 or 11? \n\t1. Value of 1. \n\t2. Value of 11. \n Enter your choice here: ";
             std::cin >> choice_ace;
         } while (choice_ace == 0 || choice_ace > 2);
@@ -115,8 +122,47 @@ void player_draw_card() {
             card = 11;
         }
     }
+    else if (card == 11) {
+        std::cout << R"(
+        .------.
+        |J.--. |
+        | :/\: |
+        | (__) |
+        | '--'J|
+        `------')";
+        std::cout << "\n You drew a Jack. It has a value of 10." << std::endl;
+        card = 10;
+    }
+    else if (card == 12) {
+        std::cout << R"(
+        .------.
+        |Q.--. |
+        | :/\: |
+        | (__) |
+        | '--'Q|
+        `------')";
+        std::cout << "\n You drew a Queen. It has a value of 10." << std::endl;
+        card = 10;
+    }
+    else if (card == 13) {
+        std::cout << R"(
+        .------.
+        |K.--. |
+        | :/\: |
+        | (__) |
+        | '--'K|
+        `------')";
+        std::cout << "\n You drew a King. It has a value of 10." << std::endl;
+        card = 10;
+    }
     else{
-        std::cout << "\n You drew a: " << card << "\n You currently have these cards in your hand: ";
+        std::cout << "\n You drew a: " << R"(
+        .------.
+        |)" << card << R"(.--. |
+        | :/\: |
+        | (__) |
+        | '--')" << card << R"(|
+        `------')" << std::endl;
     }
     player_hand.push_back(card);
     for (int ix = 0; ix < player_cardcount; ix++) {
@@ -144,10 +190,54 @@ void dealer_draw_card() {
         } while (choice_ace == 0 || choice_ace > 2);
     }
 
+    else if (card == 11) {
+        std::cout << R"(
+        .------.
+        |J.--. |
+        | :/\: |
+        | (__) |
+        | '--'J|
+        `------')";
+        std::cout << "\n The Dealer drew a Jack. It has a value of 10." << std::endl;
+        card = 10;
+    }
+    else if (card == 12) {
+        std::cout << R"(
+        .------.
+        |Q.--. |
+        | :/\: |
+        | (__) |
+        | '--'Q|
+        `------')";
+        std::cout << "\n The Dealer drew a Queen. It has a value of 10." << std::endl;
+        card = 10;
+    }
+    else if (card == 13) {
+        std::cout << R"(
+        .------.
+        |K.--. |
+        | :/\: |
+        | (__) |
+        | '--'K|
+        `------')";
+        std::cout << "\n The Dealer drew a King. It has a value of 10." << std::endl;
+        card = 10;
+    }
+    else{
+        std::cout << "\n The dealer drew a: " << R"(
+        .------.
+        |)" << card << R"(.--. |
+        | :/\: |
+        | (__) |
+        | '--')" << card << R"(|
+        `------')" << std::endl;
+    }
     dealer_hand.push_back(card);
     dealer_cardcount++;
-    std::cout << "\n The dealer drew a: " << card << std::endl;
 }
+
+  
+
 
 void dealer_turn() {
     if (dealer_value < 18) {
@@ -194,7 +284,7 @@ void player_turn(){
 }
 
 void betting_round() {
-    std::cout << " Would you like to make a bet? Press 'B' to make a bet, Press 'S' to skip betting." << std::endl;
+    std::cout << "\n Would you like to make a bet? Press 'B' to make a bet, Press 'S' to skip betting." << std::endl;
 
     char bet_choice = _getch();
     int bet_amount = 0;
@@ -204,7 +294,7 @@ void betting_round() {
         case 'b':
         case 'B':
             do {
-                std::cout << " You currently have a total of: " << player_money << "$." << std::endl;
+                std::cout << "\n You currently have a total of: " << player_money << "$." << std::endl;
                 std::cout << " The Dealer currenlty have a total of: " << dealer_money << "$." << std::endl;
                 std::cout << "\n How much money would you like to bet ?\n Type amount here:";
                 std::cin >> bet_amount;
@@ -301,7 +391,7 @@ void print_winner() {
 void new_round() {
     std::cout << "\n\n Do you want to start a new round? (Cost of entry is 10$) \n\t1. Yes\n\t2. No";
 
-    int restartroundchoice = _getch();
+    char restartroundchoice = _getch();
 
         switch (restartroundchoice){
         case '1':
@@ -319,12 +409,15 @@ void calculate_moneytotals() {
     if (round_win == 1) {
         money_pot += player_bet;
         dealer_money += money_pot;
-        player_money -= money_pot;
+        player_money -= player_bet;
     }
     if (round_win == 2) {
         money_pot += player_bet;
         dealer_money -= money_pot;
         player_money += money_pot;
+    }
+    if (round_win == 3) {
+        money_pot;
     }
 
 }
