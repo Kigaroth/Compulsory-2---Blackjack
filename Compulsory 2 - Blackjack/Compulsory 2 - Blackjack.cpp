@@ -20,12 +20,11 @@ int dealer_cardcount = 0;
 int player_bet = 0;
 
 int dealer_money = 100;
-int player_money = 100;
-int money_pot = 0;
+int player_money = 90;
+int money_pot = 10;
 
 const int round_cost = 10;
 const int bj_max_score = 21;
-const int deck_of_cards = 52;
 
 std::vector <int> player_hand = {};
 std::vector <int> dealer_hand = {};
@@ -38,7 +37,7 @@ void betting_round();
 void calculate_moneytotals();
 void start_new_round();
 void check_maxscore_or_loss();
-void show_current_wallets();
+void show_current_wallets(bool showpot);
 void player_draw_card();
 void player_turn();
 void dealer_turn();
@@ -58,7 +57,7 @@ int main()
 
     do {
         //Display player and Dealer money
-        show_current_wallets();
+        show_current_wallets(true); //when set to true, the current pot is shown.
         //Player turn
         do {
             player_turn();
@@ -81,12 +80,12 @@ int main()
         //Print the winner of the round and adds/subtracts winnings/loss.
         print_winner();
         calculate_moneytotals();
-        show_current_wallets();
-        set_game_over();
+        show_current_wallets(false); //false to not show the moneypot. The moneypot isn't reset until the player chooses to buy into a new round
+        set_game_over(); //function that sets the game to be over if the player or dealer runs out of money.
 
         //Give the user a choice to start a new round if they want, or end the game. If the player has won or lost all the money, this step is skipped.
         if (!game_over) {
-            new_round();
+            new_round(); //function resets all variables and vectors needed in order to start a new round.
         }
 
     } while (!game_over);
@@ -236,9 +235,6 @@ void dealer_draw_card() {
     dealer_cardcount++;
 }
 
-  
-
-
 void dealer_turn() {
     if (dealer_value < 18) {
         dealer_draw_card();
@@ -286,10 +282,11 @@ void player_turn(){
 void betting_round() {
     std::cout << "\n Would you like to make a bet? Press 'B' to make a bet, Press 'S' to skip betting." << std::endl;
 
-    char bet_choice = _getch();
+
     int bet_amount = 0;
     bool bet_valid = false;
-
+    do{
+        char bet_choice = _getch();
         switch (bet_choice) {
         case 'b':
         case 'B':
@@ -298,7 +295,7 @@ void betting_round() {
                 std::cout << " The Dealer currenlty have a total of: " << dealer_money << "$." << std::endl;
                 std::cout << "\n How much money would you like to bet ?\n Type amount here:";
                 std::cin >> bet_amount;
-                if (bet_amount > player_money && bet_amount > dealer_money) {
+                if (bet_amount > player_money || bet_amount > dealer_money) {
                     std::cout << "\n Invalid amount. Bet can't exceed yours or the Dealers current amount of money. Try again!" << std::endl;
                 }
                 else {
@@ -307,10 +304,16 @@ void betting_round() {
             } while (!bet_valid);
             player_bet = bet_amount;
             break;
+
         case 's':
         case 'S':
+            bet_valid = true;
             break;
+        default:
+            break;
+
         }
+    } while (!bet_valid);
 
 }
 
@@ -348,10 +351,12 @@ void check_maxscore_or_loss() {
     }
 }
 
-void show_current_wallets() {
+void show_current_wallets(bool showpot) {
     std::cout << "\t\tThe player currently has " << player_money << "$. " << std::endl;
     std::cout << "\t\tThe Dealer currently has " << dealer_money << "$. " << std::endl;
-    std::cout << "\t\tThe pot currently has " << money_pot << "$ in it." << std::endl;
+    if (showpot) {
+        std::cout << "\t\tThe pot currently has " << money_pot << "$ in it." << std::endl;
+    }
 
 }
 
@@ -391,17 +396,26 @@ void print_winner() {
 void new_round() {
     std::cout << "\n\n Do you want to start a new round? (Cost of entry is 10$) \n\t1. Yes\n\t2. No";
 
+    bool choicevalid = false;
+
+    do {
     char restartroundchoice = _getch();
 
         switch (restartroundchoice){
         case '1':
             start_new_round();
+            choicevalid = true;
             break;
         case '2':
             game_over = true;
+            choicevalid = true;
             std::cout << "\n\n";
             break;
-    }
+
+        default:
+            break;
+        }
+    } while (!choicevalid);
 }
 
 void calculate_moneytotals() {
@@ -411,13 +425,15 @@ void calculate_moneytotals() {
         dealer_money += money_pot;
         player_money -= player_bet;
     }
-    if (round_win == 2) {
+    else if (round_win == 2) {
         money_pot += player_bet;
-        dealer_money -= money_pot;
+        dealer_money -= player_bet;
         player_money += money_pot;
     }
-    if (round_win == 3) {
-        money_pot;
+    else {
+        money_pot += player_bet*2;
+        dealer_money -= player_bet;
+        player_money -= player_bet;
     }
 
 }
@@ -434,6 +450,8 @@ void set_game_over() {
 }
 
 void reset_game() {
+
+// Values that have to be reset in order for the round to start fresh.
     player_hold = false;
     dealer_hold = false;
     choice = false;
@@ -458,9 +476,9 @@ void reset_game() {
 }
 
 void start_new_round() {
-    reset_game();
-    player_money -= round_cost;
-    money_pot += round_cost;
+    reset_game(); //uses the reset_game function to reset all variables (except the player and dealers wallet) changed during the game.
+    player_money -= round_cost; //The cost to start a new round is subtracted from the player
+    money_pot += round_cost; //The cost the player paid is added to the pot.
 }
 
 void start_screen(){
@@ -495,9 +513,9 @@ void rules(){
     std::cout << R"(
 
                                                        RULES
-    _________________________________________________________________________________________________________________
+    __________________________________________________________________________________________________________________
     |                                                                                                                |
-    | - Each round costs 10$ (First round is on the house).                                                          |
+    | - The player starts with 100$. Each round costs 10$. The Dealer also starts with 100$                          |
     | - The player draws a card with 'D'.                                                                            |
     | - The player can draw as many cards as they want, but the total value of their hand can't go above 21.         | 
     | - The player can chose to hold their hand after a card is drawn by pressing 'H'                                |
